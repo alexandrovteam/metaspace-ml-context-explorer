@@ -1,13 +1,12 @@
+
+# Libraries ---------------------------------------------------------------
 library(shiny)
 library(tidyverse)
-library(ggplot2)
 library(ggsankey)
 library(gridlayout)
 library(bslib)
 library(plotly)
-library(shinyuieditor)
 library(DT)
-library(dplyr)
 library(ComplexHeatmap)
 library(ggpubr)
 
@@ -99,7 +98,7 @@ ui <- navbarPage(
                 selectInput(
                   inputId = "animalspecies",
                   label = "Animal Species",
-                  choices = list("Human" = "Homo sapiens", 
+                  choices = list("Human" = "Homo sapiens",
                                  "Mouse" = "Mus musculus",
                                  "Other" = "OTHER"))
               ),
@@ -257,28 +256,28 @@ ui <- navbarPage(
 
 # Server ------------------------------------------------------------------
 server <- function(input, output, session) {
-  
+
   kingdom = reactive(input$KingdomId)
-  
+
   selected_organism <- reactive({
-    switch(kingdom(), 
+    switch(kingdom(),
            "Animal" = input$animalspecies,
            "Plant" = input$planspecies)
   })
-  
+
   sel_contexts <- reactive({
-    req(input$polarity, input$SourceId, input$AnalyzerId, input$minmzId, 
+    req(input$polarity, input$SourceId, input$AnalyzerId, input$minmzId,
         input$maxmzId, selected_organism(), input$sampletypeId)
-    match_context(pol = input$polarity, 
-                  source = input$SourceId, 
+    match_context(pol = input$polarity,
+                  source = input$SourceId,
                   analyzer = input$AnalyzerId,
-                  min_mz = input$minmzId, 
+                  min_mz = input$minmzId,
                   max_mz = input$maxmzId,
                   organism = selected_organism(),
                   sample_type = input$sampletypeId
     )
   })
-  
+
   training_context_df = reactive({
     selected_kingdom <- kingdom()
     training_ds_list <- training_dss[[selected_kingdom]][["30"]]
@@ -289,53 +288,53 @@ server <- function(input, output, session) {
     testing_ds_list <- testing_dss[[selected_kingdom]]
     get_context_df(ds_context_list = testing_ds_list)
   })
-  
+
   ds_id_exist = reactive(input$ds_id_check)
-  
+
   sel_dss_training <- reactiveVal(NULL)
   sel_dss_testing <- reactiveVal(NULL)
-  
+
   # observe({
   #   if(ds_id_exist() == "n"){
-  #     
+  #
   #   }
   #   else{
   #     #TODO write function to get sel context from api
   #   }
   #   print(length(sel_dss_testing()))
   # })
-  
+
   observe({
     sel_contexts()
-    
+
     filtered_training <- training_context_df()$ds_id[training_context_df()$context %in% sel_contexts()]
     filtered_testing <- testing_context_df()$ds_id[testing_context_df()$context %in% sel_contexts()]
-    
+
     sel_dss_training(filtered_training)
     sel_dss_testing(filtered_testing)
   })
-  
+
   train_table = reactive({
-    
+
     req(sel_dss_training())
-    
-    all_public_dss %>% 
-      dplyr::filter(ds_id %in% sel_dss_training()) %>% 
+
+    all_public_dss %>%
+      dplyr::filter(ds_id %in% sel_dss_training()) %>%
       dplyr::select(-is_public, -rp_range, -proj_id, -proj_name,
-                    -submission_day, -regular_geom, -ibd_size) %>% 
+                    -submission_day, -regular_geom, -ibd_size) %>%
       add_hyperlink_ds()
   })
-  
+
   testing_table = reactive({
     req(sel_dss_testing())
-    
-    all_public_dss %>% 
-      dplyr::filter(ds_id %in% sel_dss_testing()) %>% 
+
+    all_public_dss %>%
+      dplyr::filter(ds_id %in% sel_dss_testing()) %>%
       dplyr::select(-is_public, -rp_range, -proj_id, -proj_name,
-                    -submission_day, -regular_geom, -ibd_size) %>% 
+                    -submission_day, -regular_geom, -ibd_size) %>%
       add_hyperlink_ds()
   })
-  
+
   enrich_table = reactive({
     req(sel_contexts(), kingdom())
     prepare_enrich_table(enrich_res = enrich_res,
@@ -345,27 +344,27 @@ server <- function(input, output, session) {
                            filter_by_adjpval = F,
                            min_TP = 3, use_FE = T)
   })
-  
+
   output$trainingtableId = renderDT({
-    
+
     train_table()
-    
+
     # datatable(train_table,
     #           options = list(dom = 'Bfrtip', buttons = c('csv')),
     #           rownames = FALSE)
-    
+
   }, escape = F)
-  
+
   output$testingtableId = renderDT({
-    
+
     testing_table()
-    
+
     # datatable(testing_table,
     #           options = list(dom = 'Bfrtip', buttons = c('csv')),
     #           rownames = FALSE)
-    
+
   }, escape = F)
-  
+
   output$downloadTrainingBtn <- downloadHandler(
     filename = function() {
       paste("training_data", Sys.Date(), ".csv", sep = "")
@@ -374,7 +373,7 @@ server <- function(input, output, session) {
       write.csv(train_table(), file)
     }
   )
-  
+
   output$downloadTestingBtn <- downloadHandler(
     filename = function() {
       paste("testing_data", Sys.Date(), ".csv", sep = "")
@@ -383,29 +382,29 @@ server <- function(input, output, session) {
       write.csv(testing_table(), file)
     }
   )
-  
+
   output$sankey <- renderPlot({
-    
+
     req(testing_context_df(),kingdom(),sel_dss_testing())
-    
+
     plot_new_sankey(meta_df = testing_context_df(),
                     kingdom = kingdom(),
                     sel_dss = sel_dss_testing(),
                     plot_title = "Testing datasets")
   })
-  
+
   output$sunny_plotly <- renderPlotly({
     req(testing_context_df(),sel_dss_testing())
-    
+
     plot_sunburst_meta(meta_df = testing_context_df(),
                        sel_dss = sel_dss_testing())
-    
+
   })
-  
+
   output$fig3a <- renderPlot({
-    
+
     req(kingdom(), sel_contexts(),testing_context_df())
-    
+
     if(length(intersect(testing_context_df()$context, sel_contexts())) == 1){
       Performance_plots_pipeline(eval_res = all_eval_res,
                                  ds_list = testing_dss,
@@ -426,7 +425,7 @@ server <- function(input, output, session) {
                                  plot_title = paste0("Testing datasets", "\n", "MAP"))
     }
     else if (length(intersect(testing_context_df()$context, sel_contexts())) > 1){
-      
+
       AP_box_animal = reactive({
         prepare_plot_df(eval_res = all_eval_res,
                         ds_list = testing_dss,
@@ -435,17 +434,17 @@ server <- function(input, output, session) {
                         kingdom = kingdom(),metrics_per_grp = F,
                         mean_eval_context = F)
       })
-      
+
       make_density_hm_context(df = AP_box_animal(), FDR = 10,
                               vals = "MAP", kingdom = kingdom(),
                               plot_title = paste0("Testing datasets", "\n", "MAP"))
     }
   })
-  
+
   output$fig4a <- renderPlot({
-    
+
     req(kingdom(), sel_contexts(),testing_context_df())
-    
+
     if(length(intersect(testing_context_df()$context, sel_contexts())) == 1){
       Performance_plots_pipeline(eval_res = all_eval_res,
                                  ds_list = testing_dss,
@@ -474,16 +473,16 @@ server <- function(input, output, session) {
                         kingdom = kingdom(),metrics_per_grp = F,
                         mean_eval_context = F,FDR.pct = 10)
       })
-      
+
       make_density_hm_context(df = Annot_MAP_animal(),FDR = 10,vals = "LogDiff",
                               kingdom = kingdom(), plot_title = NULL)
     }
   })
-  
+
   output$fig5a <- renderPlot({
-    
+
     req(kingdom(), sel_contexts(),testing_context_df())
-    
+
     Performance_plots_pipeline(eval_res = all_eval_res,
                                ds_list = testing_dss,
                                sel_context = sel_contexts(),
@@ -501,11 +500,11 @@ server <- function(input, output, session) {
                                context_specific = F,
                                in_plot_text_size = 5)
   })
-  
+
   output$reliabilityId <- renderPlot({
-    
+
     req(kingdom(), sel_dss_testing())
-    
+
     ggstats_wrapper(df = rel_scores,
                     kingdom = kingdom(),
                     sel_dss = sel_dss_testing(),
@@ -519,22 +518,22 @@ server <- function(input, output, session) {
             axis.title = element_text(size = 14)) +
       ylim(c(0,1))
   })
-  
+
   output$fig7c <- renderPlot({
     req(kingdom(), sel_contexts(),testing_context_df(),sel_dss_testing())
-    
+
     if(length(intersect(testing_context_df()$context, sel_contexts())) == 1){
-      
+
       plot_enrich_boxplot(enrich_res = enrich_res,
                           kingdom = kingdom(),
                           sel_dss = sel_dss_testing(),
                           HMDB_taxo_info = HMDB_taxo_info,
                           pval_thresh = 0.05, min_TP = 3,
                           min_dss_prop = 0.1)
-      
+
     }
     else if (length(intersect(testing_context_df()$context, sel_contexts())) > 1){
-      
+
       plot_enrich_hm_context(enrich_res = enrich_res,
                              ds_list = testing_dss,
                              sel_context = sel_contexts(),
@@ -544,12 +543,12 @@ server <- function(input, output, session) {
                              min_dss_prop = 0.1)
     }
   })
-  
+
   output$enrichtable <- renderDT({
-    enrich_table() %>% 
+    enrich_table() %>%
       dplyr::select(-TP_markers)
   },selection = "single")
-  
+
   output$downloadenrichBtn <- downloadHandler(
     filename = function() {
       paste("enrichment_data", Sys.Date(), ".csv", sep = "")
@@ -558,19 +557,19 @@ server <- function(input, output, session) {
       write.csv(enrich_table(), file)
     }
   )
-  
+
   output$tp_markers <- renderPrint({
-    enrich_table()[input$enrichtable_rows_selected, "TP_markers"] %>% 
-      as.character() %>% 
-      strsplit(",") %>% 
-      unlist() %>% 
-      paste(sep = "", collapse = "\n") %>% 
+    enrich_table()[input$enrichtable_rows_selected, "TP_markers"] %>%
+      as.character() %>%
+      strsplit(",") %>%
+      unlist() %>%
+      paste(sep = "", collapse = "\n") %>%
       cat()
   })
-   
-  
+
+
 }
 
 shinyApp(ui, server)
-  
+
 
