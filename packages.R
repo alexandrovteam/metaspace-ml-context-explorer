@@ -5,7 +5,7 @@ install.packages("https://cran.r-project.org/src/contrib/Archive/shiny/shiny_1.7
                  repos = NULL, type = "source")
 
 install.packages("ggsignif", repos = 'http://cran.us.r-project.org')
-install.packages("ggstatsplot")
+
 install.packages('ggpubr')
 install.packages("RColorBrewer", repos = 'http://cran.us.r-project.org')
 install.packages("DT", repos = 'http://cran.us.r-project.org')
@@ -15,3 +15,11 @@ BiocManager::install("ComplexHeatmap")
 devtools::install_github("rstudio/gridlayout")
 devtools::install_github("yogevherz/plotme")
 devtools::install_github("davidsjoberg/ggsankey")
+
+install.packages("ggstatsplot", repos = 'http://cran.us.r-project.org')
+
+install.packages("https://cran.r-project.org/src/contrib/Archive/statsExpressions/statsExpressions_1.3.5.tar.gz",
+                 repos = NULL, type = "source")
+
+install.packages("https://cran.r-project.org/src/contrib/Archive/ggstatsplot/ggstatsplot_0.9.5.tar.gz",
+                 repos = NULL, type = "source")
