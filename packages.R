@@ -24,4 +24,4 @@ install.packages("https://cran.r-project.org/src/contrib/Archive/statsExpression
 install.packages("https://cran.r-project.org/src/contrib/Archive/ggstatsplot/ggstatsplot_0.9.5.tar.gz",
                  repos = NULL, type = "source")
 
-install.packages("PMCMRplus", repos = 'http://cran.us.r-project.org')
+install.packages("PMCMRplus")
