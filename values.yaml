@@ -1,0 +1,119 @@
+# Default values for rshiny-eks.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: registry.git.embl.de/bwadie/metaspace-ml-context-explorer/multiomics
+  containerPort: 3838
+  # add in a TAG key
+  # don't use latest!
+  tag: prod-fddf471e
+  pullPolicy: Always
+
+env:
+  SHINY_LOG_LEVEL: "TRACE"
+
+imagePullSecrets:
+  - name: gitlab-read-registry
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+replicaCount: 3
+
+podSecurityContext: {}
+  #runAsUser: 3000
+  #runAsGroup: 3000
+  #fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  #capabilities:
+  #  drop:
+  #  - ALL
+  #  add:
+  #  - SYS_ADMIN
+  #readOnlyRootFilesystem: true
+  #runAsNonRoot: true
+  #runAsUser: 1000
+  #
+
+service:
+  type: ClusterIP
+  port: 3838
+
+ingress:
+  ingressClassName: external-users
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls.certresolver: sectigo
+    traefik.ingress.kubernetes.io/router.middlewares: global-stripprefix@file
+    #traefik.ingress.kubernetes.io/router.middlewares: sslheader@file
+  hosts:
+# your real domain
+# this may take some time to propogate the first time around due to DNS settings.
+# Don't freak out!
+    - host: apps.embl.de
+      paths:
+        - "/metaspace-context-explorer"
+# Get the service url
+# with kubectl get svc -o wide | grep MY_RELEASE_NAME
+#    - host: lots-o-numbas.aws-region.elb.amazonaws.com
+#      paths:
+#        - "/"
+  tls:
+    - hosts:
+        - apps.embl.de
+  # If you're using https you'll need to update this
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 2
+    memory: 2G
+  requests:
+    cpu: 1
+    memory: 2G
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+## Persist data to a persistent volume
+persistence:
+  enabled: false
+  ## database data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: basic-csi
+  accessMode: ReadWriteOnce
+  size: 6Gi
+  annotations: {}
+#
+## Volumes
+#extraVolumes:
+#  - name: abseqapp-shiny
+#    persistentVolumeClaim:
+#      claimName: nolegal-shiny
+#extraVolumeMounts:
+#  - name: abseqapp-shiny
+#    mountPath: /srv/shiny-server
