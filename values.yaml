@@ -27,7 +27,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
-replicaCount: 3
+replicaCount: 1
 
 podSecurityContext: {}
   #runAsUser: 3000
