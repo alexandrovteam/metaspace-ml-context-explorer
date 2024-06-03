@@ -63,7 +63,7 @@ ingress:
 # Don't freak out!
     - host: apps.embl.de
       paths:
-        - "/metaspace-context-explorer"
+        - "/metaspacecontext"
 # Get the service url
 # with kubectl get svc -o wide | grep MY_RELEASE_NAME
 #    - host: lots-o-numbas.aws-region.elb.amazonaws.com
