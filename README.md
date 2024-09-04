@@ -50,7 +50,7 @@ Wadie, B., Stuart, L., Rath, C. M., Drotleff, B., Mamedov, S., & Alexandrov, T. 
 If you encounter any issues or have suggestions for improvements, please report them via the [GitHub Issues page](https://github.com/Bisho2122/metaspace-ml-context-explorer/issues).
 
 ## License
-This project is licensed under the License Name - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Bisho2122/metaspace-ml-context-explorer/blob/main/LICENSE) file for details.
 
 
 
