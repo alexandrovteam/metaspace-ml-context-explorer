@@ -22,7 +22,7 @@ You can explore the features of the app without the need for local installation.
 
 If you prefer to run the app locally, you can do so by following these instructions
 
-To run this app locally, you'll need R and the R packages mentioned in `packages.R` [script](https://github.com/Bisho2122/metaspace-ml-context-explorer/packages.R)
+To run this app locally, you'll need R and the R packages mentioned in `packages.R` [script](https://github.com/alexandrovteam/metaspace-ml-context-explorer/packages.R)
 
 Once you have the required packages installed, you can run the app by cloning the repository and using the following R commands:
 
@@ -47,10 +47,10 @@ If you use this app in your research, please cite the accompanying paper:
 Wadie, B., Stuart, L., Rath, C. M., Drotleff, B., Mamedov, S., & Alexandrov, T. (2023). METASPACE-ML: Metabolite annotation for imaging mass spectrometry using machine learning. biorxiv, 2023-05.
 
 ## Issues
-If you encounter any issues or have suggestions for improvements, please report them via the [GitHub Issues page](https://github.com/Bisho2122/metaspace-ml-context-explorer/issues).
+If you encounter any issues or have suggestions for improvements, please report them via the [GitHub Issues page](https://github.com/alexandrovteam/metaspace-ml-context-explorer/issues).
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/Bisho2122/metaspace-ml-context-explorer/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/alexandrovteam/metaspace-ml-context-explorer/blob/main/LICENSE) file for details.
 
 
 
